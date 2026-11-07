@@ -1,0 +1,24 @@
+name: Tests
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Coordinator tests
+        run: python -m unittest discover -s tests -v
+      - name: Workshop example tests
+        working-directory: examples/workshop-registration
+        run: python -m unittest discover -s tests -v
+      - name: Disabled example configuration
+        run: python -m tools.validate_pact_config --config config.example.json

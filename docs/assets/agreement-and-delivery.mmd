@@ -1,0 +1,14 @@
+flowchart LR
+  A["Conflicting human requests"] --> F["Facilitator clarifies"]
+  F --> P["Planner: versioned brief"]
+  P --> C{"Client AND Operations\nconfirm same version?"}
+  C -->|No| WAIT["Wait / resolve disagreement"]
+  WAIT --> C
+  C -->|Yes| B["Builder: candidate commit"]
+  B --> T["Actual tests"]
+  T --> R["Independent reviewer"]
+  R -->|Changes requested · bounded| B
+  R -->|Approved| S["Steward prepares evidence"]
+  S --> H["Lead accepts exact delivery"]
+  H --> CHANGE["New requirement: new version"]
+  CHANGE --> P

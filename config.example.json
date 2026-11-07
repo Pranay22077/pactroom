@@ -1,0 +1,52 @@
+{
+  "live_enabled": false,
+  "server_id": "pactroom-server",
+  "switch_url": "http://127.0.0.1:8000",
+  "runner_agent_id": "REPLACE_WITH_DEDICATED_RUNNER_AGENT_ID",
+  "connection_id": "pactroom-runner-v1",
+  "token_file": "/home/ubuntu/relay-state/runner-token",
+  "rooms": {
+    "ACTUAL_TEAM_ROOM_ID": "pactroom-team",
+    "ACTUAL_ENGINE_ROOM_ID": "pactroom-engine"
+  },
+  "humans": [],
+  "roles": {},
+  "status_messages": true,
+  "workflows": {
+    "pactroom": {
+      "enabled": false,
+      "team_room_id": "ACTUAL_TEAM_ROOM_ID",
+      "engine_room_id": "ACTUAL_ENGINE_ROOM_ID",
+      "workspace_owner_room_id": "ACTUAL_TEAM_ROOM_ID",
+      "test_profile": "python-unittest",
+      "max_repairs": 2,
+      "required_confirmers": [
+        "client",
+        "operations"
+      ],
+      "humans": {
+        "delivery_lead": "ACTUAL_LEAD_ID",
+        "client": "ACTUAL_CLIENT_ID",
+        "operations": "ACTUAL_OPERATIONS_ID"
+      },
+      "roles": {
+        "planner": {
+          "name": "pact-planner",
+          "sender_id": "ACTUAL_PLANNER_ID"
+        },
+        "coder": {
+          "name": "pact-builder",
+          "sender_id": "ACTUAL_BUILDER_ID"
+        },
+        "reviewer": {
+          "name": "pact-reviewer",
+          "sender_id": "ACTUAL_REVIEWER_ID"
+        },
+        "steward": {
+          "name": "pact-steward",
+          "sender_id": "ACTUAL_STEWARD_ID"
+        }
+      }
+    }
+  }
+}

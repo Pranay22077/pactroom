@@ -1,0 +1,33 @@
+flowchart TB
+  H["Delivery lead · Client · Operations"] <--> D["Discord: team channel"]
+  subgraph AWS["AWS Ubuntu · hosted execution"]
+    subgraph Docker["Docker services"]
+      S["Switch Core + Discord bridge"]
+      G["Gateway"]
+      DB["PostgreSQL"]
+      S --- G
+      S --- DB
+    end
+    T["Switch team room"]
+    E["Switch engine room"]
+    RUN["Relay Runner · Python coordinator"]
+    CTRL["Agent controller + Codex CLI sessions"]
+    F["Facilitator"]
+    ROLES["Planner · Builder · Reviewer · Steward"]
+    W["Shared Git project + actual tests"]
+    R["Separate fixed-commit review copy"]
+    S --- T
+    S --- E
+    T <--> F
+    T <--> RUN
+    RUN <--> E
+    E <--> ROLES
+    CTRL --- F
+    CTRL --- ROLES
+    ROLES --> W
+    W --> R
+  end
+  D <--> S
+  P["External model provider"] <--> CTRL
+  U["Authorized remote inspection\nTailscale + individual accounts"] --> G
+  U --> W

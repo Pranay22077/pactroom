@@ -1,0 +1,8 @@
+{
+  ".gitignore": "6feaded4e28ea86e001a6751b4e3d960e8b7c31b9616ff9936b79297086e809b",
+  "README.md": "0b6ecd8d421e8a2b9084f7f9ed37e6171ab3ab387029b7710a73227882e0e443",
+  "tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "tests/test_cancellation.py": "2bd2d68d7a1ce13e34df33b7c9b886e8ae76fa7f3d4e6fdb944911ee521f7696",
+  "tests/test_workshop_registration.py": "8cb4725c92383bd3ce140040e8525a9b6030cb72bdd0dbc1f40b06dcd187ad4a",
+  "workshop_registration.py": "a6f400d726b534fa7bc1f10f746792eb297adc7c11369ec7001a065f9ec197e2"
+}

@@ -1,0 +1,25 @@
+[Unit]
+Description=Relay room workflow coordinator (enable only after pilot qualification)
+After=network-online.target docker.service
+Wants=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/relay-system
+ExecStart=/usr/bin/python3 -m app.cli serve --config /home/ubuntu/relay-state/config.json
+Restart=on-failure
+RestartSec=15
+RestartPreventExitStatus=78
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/ubuntu/relay-state /home/ubuntu/relay-projects
+Environment=PYTHONDONTWRITEBYTECODE=1
+
+[Install]
+WantedBy=multi-user.target
