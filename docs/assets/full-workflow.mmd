@@ -1,0 +1,137 @@
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#EDF3F2","primaryTextColor":"#24383D","primaryBorderColor":"#63817F","lineColor":"#7B8D91","fontFamily":"Arial, sans-serif","fontSize":"16px"},"flowchart":{"curve":"basis","nodeSpacing":32,"rankSpacing":48}}}%%
+flowchart TB
+    subgraph Setup[01 · Prepare the shared environment]
+        Host[Linux execution host with Git and Python] --> Docker[Switch Core, Gateway and PostgreSQL in Docker]
+        Docker --> Health[Check database listener and Switch connectivity]
+        Health --> Controller[Persistent agent controller and authenticated Codex CLI]
+        Controller --> Profile[Five profiles with scoped role instructions]
+        Profile --> Rooms[Connect separate Discord team and engine rooms]
+        Rooms --> Identities[Dedicated Runner identity and three distinct human identities]
+        Identities --> Config[Private configuration: rooms, senders, workspace and token path]
+        Config --> Validate[Validate configuration and probe room access]
+        Validate --> Worker[Enable exactly one Runner worker]
+    end
+
+    subgraph Discuss[02 · People establish the request]
+        Client[Client describes product behavior] --> Facilitate[Facilitator explains conflict and decision ownership]
+        Ops[Operations describes constraints] --> Facilitate
+        Facilitate --> Lead[Lead sends a new pact start request]
+        Lead --> Switch[Discord connector delivers team-room message through Switch]
+        Switch --> Auth{Configured room, command and authorized sender?}
+        Auth -->|No| Refuse[Reject request without authorizing work]
+        Auth -->|Yes| Duplicate{Already handled source message?}
+        Duplicate -->|Yes| Existing[Use recorded outcome; no second workflow]
+        Duplicate -->|No| Task[Create task and room-owned project workspace]
+    end
+    Worker --> Switch
+
+    subgraph Planning[03 · Planner produces an explicit agreement]
+        Task --> Handoff[Runner persists and dispatches a targeted Planner assignment]
+        Handoff --> Session[Controller runs assigned Codex session on the host]
+        Session --> Brief[Structured result: objective, requirement IDs, owners and acceptance examples]
+        Brief --> Schema{Valid expected result and handoff context?}
+        Schema -->|No| Failure[Record failure or blocker; inspect before recovery]
+        Schema -->|Yes| Version[Persist brief revision and canonical content hash]
+        Version --> Decisions{Unresolved decisions remain?}
+        Decisions -->|Yes| DecisionWait[WAITING_FOR_DECISION: humans resolve ambiguity]
+        Decisions -->|No| ConfirmWait[WAITING_FOR_CONFIRMATION: post readable brief and exact command]
+    end
+
+    subgraph Agreement[04 · Both stakeholders confirm the current brief]
+        ConfirmWait --> CConfirm[Client sends confirmation]
+        ConfirmWait --> OConfirm[Operations sends confirmation]
+        CConfirm --> ConfirmCheck{Current task, revision, hash and configured confirmer?}
+        OConfirm --> ConfirmCheck
+        ConfirmCheck -->|No| Invalid[Reject stale or unauthorized confirmation]
+        ConfirmCheck -->|Yes| Record[Record confirmation with sender and source message]
+        Record --> Both{Both distinct required people confirmed?}
+        Both -->|No| Waiting[Keep waiting; repeated confirmation is not a second person]
+        Waiting -.-> ConfirmWait
+        Both -->|Yes| Queue[BUILD_QUEUED: wait for serialized scheduler]
+    end
+
+    subgraph Build[05 · Implement and test the candidate]
+        Queue --> Assign[Runner dispatches Builder with task, brief, handoff and workspace]
+        Assign --> Code[Builder reads project and implements on assigned task branch]
+        Code --> Commit[Builder supplies candidate commit and requirement-to-test mapping]
+        Commit --> Candidate{Candidate and result valid?}
+        Candidate -->|No| Failure
+        Candidate -->|Yes| Test[Runner executes controlled unittest command on candidate]
+        Test --> Outcome{Actual test outcome?}
+        Outcome -->|Pass| Archive[Prepare separate exact-commit review copy]
+        Outcome -->|Supported test failure| Repair
+        Outcome -->|Timeout or execution error| Failure
+    end
+
+    subgraph Review[06 · Independent review and bounded repairs]
+        Archive --> ReviewAssign[Runner dispatches Reviewer with brief, candidate and test evidence]
+        ReviewAssign --> Inspect[Reviewer checks behavior, code and requirement mappings]
+        Inspect --> Verdict{Validated review verdict?}
+        Verdict -->|Changes requested| Repair{Repair budget remains?}
+        Repair -->|Yes: at most two repair cycles| Feedback[Return concrete findings to Builder]
+        Feedback --> Assign
+        Repair -->|No| Attention[Operator attention; no automatic retry]
+        Verdict -->|Blocked or invalid result| Failure
+        Verdict -->|Approved| Approved[Record approval tied to revision, hash and commit]
+    end
+
+    subgraph Delivery[07 · Package evidence and request acceptance]
+        Approved --> Steward[Runner dispatches Steward to prepare delivery summary]
+        Steward --> CheckDelivery[Validate delivery result and current candidate]
+        CheckDelivery --> Ready[READY_FOR_ACCEPTANCE: show exact acceptance command]
+        Ready --> Summary[Team sees test count, review, mapping and delivery reference]
+        Summary --> AcceptCmd[Lead sends pact accept with revision, hash and commit]
+        AcceptCmd --> Fresh{Authorized lead, current clean candidate and matching approved review?}
+        Fresh -->|No| RejectAccept[Reject acceptance; inspect stale or changed inputs]
+        Fresh -->|Yes| Accepted[ACCEPTED: persist human acceptance]
+        Accepted --> Evidence[Retain detailed evidence on execution host]
+    end
+
+    subgraph Changes[08 · Changed requirements restart agreement]
+        Change[Authorized requirement-change request] --> Active{Outstanding agent work?}
+        Active -->|Already dispatched or uncertain| Pending[CHANGE_PENDING: settle or reconcile outstanding work]
+        Active -->|No active dispatched work| Revise[Create next revision and supersede prior readiness]
+        Pending --> Revise
+        Revise --> Replan[Replan; old confirmations do not authorize the new brief]
+        Replan --> Handoff
+    end
+    DecisionWait --> Change
+    Summary -.->|New requirements| Change
+    Accepted -.->|New requirements| Change
+
+    subgraph Operations[09 · Recovery and inspection]
+        Failure --> Attention
+        Attention --> Diagnose[Inspect ledger, outstanding handoff, controller and logs]
+        Diagnose --> Recovery[Use eligible operator recovery after reconciling actual state]
+        Recovery -.-> Resume[Resume only the eligible recorded stage; do not blindly resend]
+        Query[Configured human requests status, brief or evidence] --> Read[Read current recorded state]
+        Read --> TeamReply[Post concise team-facing response]
+    end
+
+    subgraph Export[10 · Separate operator-controlled publication]
+        Evidence -.-> ExportCheck[Operator verifies accepted commit and inspects export]
+        ExportCheck -.-> Local[Copy source locally or prepare an authorized repository]
+        Local -.-> Publish[Optional manual push or pull request]
+        Publish -.-> Merge[Human-controlled merge and any later deployment]
+    end
+
+    classDef human fill:#EDF3F2,stroke:#63817F,color:#24383D,stroke-width:1.5px;
+    classDef control fill:#344F54,stroke:#344F54,color:#FFFFFF,stroke-width:1.5px;
+    classDef hold fill:#E6EBED,stroke:#778C93,color:#263A40,stroke-dasharray:4 3;
+    classDef evidence fill:#DDEBE8,stroke:#63817F,color:#24383D;
+    classDef outside fill:#FAFBFC,stroke:#9CAEB2,color:#546A70,stroke-dasharray:5 4;
+    class Client,Ops,Lead,CConfirm,OConfirm,AcceptCmd,Change,Query human;
+    class Auth,Duplicate,Schema,Decisions,ConfirmCheck,Both,Candidate,Outcome,Verdict,Repair,Fresh,Active control;
+    class Failure,DecisionWait,ConfirmWait,Waiting,Attention,Pending,Invalid,RejectAccept,Refuse hold;
+    class Version,Record,Commit,Approved,Accepted,Evidence evidence;
+    class ExportCheck,Local,Publish,Merge outside;
+    style Setup fill:#F8FAFB,stroke:#A1B1B4,color:#24383D;
+    style Discuss fill:#F3F7F6,stroke:#A1B1B4,color:#24383D;
+    style Planning fill:#F8FAFB,stroke:#A1B1B4,color:#24383D;
+    style Agreement fill:#F3F7F6,stroke:#A1B1B4,color:#24383D;
+    style Build fill:#F8FAFB,stroke:#A1B1B4,color:#24383D;
+    style Review fill:#F3F7F6,stroke:#A1B1B4,color:#24383D;
+    style Delivery fill:#F8FAFB,stroke:#A1B1B4,color:#24383D;
+    style Changes fill:#F3F7F6,stroke:#A1B1B4,color:#24383D;
+    style Operations fill:#F8FAFB,stroke:#A1B1B4,color:#24383D;
+    style Export fill:#FAFBFC,stroke:#A1B1B4,color:#24383D,stroke-dasharray:5 4;

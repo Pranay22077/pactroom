@@ -1,12 +1,18 @@
 # PactRoom
 
+<p>
+  <a href="https://discord.gg/QSd8BU5Dt"><img src="https://img.shields.io/badge/Discord-Join_the_community-344A51?style=for-the-badge&logo=discord&logoColor=white" alt="Join PactRoom on Discord"></a>
+  <a href="https://dev.to/pranay22077/two-people-one-brief-building-pactroom-with-switch-discord-and-aws-2a42"><img src="https://img.shields.io/badge/DEV-Read_the_story-25343C?style=for-the-badge&logo=devdotto&logoColor=white" alt="Read the PactRoom build walkthrough on DEV"></a>
+  <a href="docs/WORKFLOW.md"><img src="https://img.shields.io/badge/Workflow-Explore_the_system-45676A?style=for-the-badge&logo=mermaid&logoColor=white" alt="Explore the complete PactRoom workflow"></a>
+</p>
+
 **Turn team decisions into reviewed software deliveries.**
 
 PactRoom connects people and coding agents through Discord and Switch. It records agreement on a versioned brief, coordinates implementation and independent review, and lets the delivery lead accept the exact result.
 
 Two stakeholders must confirm the same requirements before coding begins. If those requirements change, the previous confirmations no longer authorize work on the new version.
 
-[Quick start](#quick-start) · [Deployment guide](docs/SETUP.md) · [Discord commands](docs/USAGE.md) · [Build walkthrough](https://dev.to/pranay22077/two-people-one-brief-building-pactroom-with-switch-discord-and-aws-2a42)
+[Full workflow](docs/WORKFLOW.md) · [Quick start](#quick-start) · [Deployment guide](docs/SETUP.md) · [Discord commands](docs/USAGE.md) · [Build walkthrough](https://dev.to/pranay22077/two-people-one-brief-building-pactroom-with-switch-discord-and-aws-2a42)
 
 ## Why PactRoom?
 
@@ -24,6 +30,7 @@ PactRoom makes that agreement explicit. People settle the policy; agents impleme
 ## How it works
 
 ```mermaid
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#EDF3F2","primaryTextColor":"#24383D","primaryBorderColor":"#63817F","lineColor":"#7B8D91","secondaryColor":"#F5F7F8","tertiaryColor":"#E3EBED","fontFamily":"Arial, sans-serif","fontSize":"15px"},"flowchart":{"curve":"basis","nodeSpacing":28,"rankSpacing":38}}}%%
 flowchart TD
     Discuss[Team discusses requirements with Facilitator] --> Plan[Planner prepares versioned brief]
     Plan --> Gate{Both stakeholders confirm current brief?}
@@ -38,6 +45,15 @@ flowchart TD
     Repair -->|No| Attention[Operator attention]
     Review -->|Approved| Steward[Steward prepares delivery]
     Steward --> Accept[Lead accepts exact reviewed result]
+
+    classDef human fill:#EDF3F2,stroke:#63817F,color:#24383D,stroke-width:1.5px;
+    classDef process fill:#F7F9FA,stroke:#A1B1B4,color:#263A40;
+    classDef control fill:#344F54,stroke:#344F54,color:#FFFFFF,stroke-width:1.5px;
+    classDef hold fill:#E6EBED,stroke:#778C93,color:#263A40,stroke-dasharray:4 3;
+    class Discuss,Accept human;
+    class Plan,Build,Tests,Review,Steward process;
+    class Gate,Repair control;
+    class Wait,Attention hold;
 ```
 
 All specialist handoffs are controlled by Runner through Switch. The arrows describe the execution sequence, not agents independently calling one another. A changed brief starts a new agreement cycle and makes earlier delivery evidence stale.
@@ -59,6 +75,8 @@ The **team room** contains the three people, Facilitator and Runner. It holds di
 | Reviewer | Checks the specified brief and candidate independently |
 | Steward | Prepares the delivery summary and supporting evidence |
 | Python Runner | Validates identities, persists state, schedules work, runs tests and checks results |
+
+[Explore the full workflow](docs/WORKFLOW.md) for setup, identity checks, confirmation gates, retries, changes and acceptance.
 
 The five agent profiles use Codex in the demonstrated deployment. Runner is ordinary Python code, not another model. Role instructions are in [agent-instructions/](agent-instructions/).
 
@@ -100,6 +118,7 @@ Windows supports local checks and Switch Console. The persistent Runner worker r
 [Switch](https://github.com/sandbox-quantum/switch) supplies rooms, agent identities, message transport and Discord integration. Runner supplies the agreement state machine and delivery checks.
 
 ```mermaid
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#EDF3F2","primaryTextColor":"#24383D","primaryBorderColor":"#63817F","lineColor":"#7B8D91","secondaryColor":"#F5F7F8","tertiaryColor":"#E3EBED","fontFamily":"Arial, sans-serif","fontSize":"15px"},"flowchart":{"curve":"basis","nodeSpacing":28,"rankSpacing":38}}}%%
 flowchart TB
     Discord[People in Discord] <-->|Discord connector| Core
     Console[Switch Console / browser] <-->|Authorized private access| Gateway
@@ -117,6 +136,17 @@ flowchart TB
         Runner --> Evidence[Test and delivery records]
     end
     CLI <-->|Inference requests| Provider[External model provider]
+
+    classDef client fill:#EDF3F2,stroke:#63817F,color:#24383D;
+    classDef service fill:#F7F9FA,stroke:#A1B1B4,color:#263A40;
+    classDef control fill:#344F54,stroke:#344F54,color:#FFFFFF;
+    classDef storage fill:#E3EBED,stroke:#778C93,color:#263A40;
+    class Discord,Console,Provider client;
+    class Gateway,Core,Controller,CLI service;
+    class Runner control;
+    class Postgres,Ledger,Workspace,Review,Evidence storage;
+    style AWS fill:#FAFBFC,stroke:#A1B1B4,color:#24383D;
+    style Docker fill:#EDF3F2,stroke:#63817F,color:#24383D;
 ```
 
 The laptop is a client; source files, tests, agent execution and workflow state live on the Ubuntu host. EC2 does not host model weights. Execution can continue while laptops sleep as long as cloud services, network and provider access remain available.

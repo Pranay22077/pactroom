@@ -1,14 +1,24 @@
-flowchart LR
-  A["Conflicting human requests"] --> F["Facilitator clarifies"]
-  F --> P["Planner: versioned brief"]
-  P --> C{"Client AND Operations\nconfirm same version?"}
-  C -->|No| WAIT["Wait / resolve disagreement"]
-  WAIT --> C
-  C -->|Yes| B["Builder: candidate commit"]
-  B --> T["Actual tests"]
-  T --> R["Independent reviewer"]
-  R -->|Changes requested · bounded| B
-  R -->|Approved| S["Steward prepares evidence"]
-  S --> H["Lead accepts exact delivery"]
-  H --> CHANGE["New requirement: new version"]
-  CHANGE --> P
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#EDF3F2","primaryTextColor":"#24383D","primaryBorderColor":"#63817F","lineColor":"#7B8D91","secondaryColor":"#F5F7F8","tertiaryColor":"#E3EBED","fontFamily":"Arial, sans-serif","fontSize":"15px"},"flowchart":{"curve":"basis","nodeSpacing":28,"rankSpacing":38}}}%%
+flowchart TD
+    Discuss[Team discusses requirements with Facilitator] --> Plan[Planner prepares versioned brief]
+    Plan --> Gate{Both stakeholders confirm current brief?}
+    Gate -->|Not yet| Wait[Wait for missing confirmation]
+    Wait --> Gate
+    Gate -->|Yes| Build[Builder implements and commits]
+    Build --> Tests[Runner executes tests]
+    Tests -->|Pass| Review[Reviewer checks exact candidate]
+    Tests -->|Fail| Repair{Repair budget available?}
+    Review -->|Changes requested| Repair
+    Repair -->|Yes: at most two cycles| Build
+    Repair -->|No| Attention[Operator attention]
+    Review -->|Approved| Steward[Steward prepares delivery]
+    Steward --> Accept[Lead accepts exact reviewed result]
+
+    classDef human fill:#EDF3F2,stroke:#63817F,color:#24383D,stroke-width:1.5px;
+    classDef process fill:#F7F9FA,stroke:#A1B1B4,color:#263A40;
+    classDef control fill:#344F54,stroke:#344F54,color:#FFFFFF,stroke-width:1.5px;
+    classDef hold fill:#E6EBED,stroke:#778C93,color:#263A40,stroke-dasharray:4 3;
+    class Discuss,Accept human;
+    class Plan,Build,Tests,Review,Steward process;
+    class Gate,Repair control;
+    class Wait,Attention hold;
