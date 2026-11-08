@@ -1,0 +1,1 @@
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#EDF3F2","primaryTextColor":"#24383D","primaryBorderColor":"#63817F","lineColor":"#7B8D91","secondaryColor":"#F5F7F8","tertiaryColor":"#E3EBED","fontFamily":"Arial, sans-serif","fontSize":"15px"},"flowchart":{"curve":"basis","nodeSpacing":28,"rankSpacing":38}}}%%

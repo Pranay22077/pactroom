@@ -1,33 +1,29 @@
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#EDF3F2","primaryTextColor":"#24383D","primaryBorderColor":"#63817F","lineColor":"#7B8D91","secondaryColor":"#F5F7F8","tertiaryColor":"#E3EBED","fontFamily":"Arial, sans-serif","fontSize":"15px"},"flowchart":{"curve":"basis","nodeSpacing":28,"rankSpacing":38}}}%%
 flowchart TB
-  H["Delivery lead · Client · Operations"] <--> D["Discord: team channel"]
-  subgraph AWS["AWS Ubuntu · hosted execution"]
-    subgraph Docker["Docker services"]
-      S["Switch Core + Discord bridge"]
-      G["Gateway"]
-      DB["PostgreSQL"]
-      S --- G
-      S --- DB
+    Discord[People in Discord] <-->|Discord connector| Core
+    Console[Switch Console / browser] <-->|Authorized private access| Gateway
+    subgraph AWS[Ubuntu host on AWS EC2]
+        subgraph Docker[Docker services]
+            Gateway[Switch Gateway] <--> Core[Switch Core]
+            Core <--> Postgres[(PostgreSQL)]
+        end
+        Core <--> Runner[Python Runner]
+        Runner <--> Ledger[(SQLite workflow ledger)]
+        Core <--> Controller[Persistent agent controller]
+        Controller --> CLI[Codex CLI sessions]
+        CLI --> Workspace[Room-owned Git workspace]
+        Workspace --> Review[Separate exact-commit review copy]
+        Runner --> Evidence[Test and delivery records]
     end
-    T["Switch team room"]
-    E["Switch engine room"]
-    RUN["Relay Runner · Python coordinator"]
-    CTRL["Agent controller + Codex CLI sessions"]
-    F["Facilitator"]
-    ROLES["Planner · Builder · Reviewer · Steward"]
-    W["Shared Git project + actual tests"]
-    R["Separate fixed-commit review copy"]
-    S --- T
-    S --- E
-    T <--> F
-    T <--> RUN
-    RUN <--> E
-    E <--> ROLES
-    CTRL --- F
-    CTRL --- ROLES
-    ROLES --> W
-    W --> R
-  end
-  D <--> S
-  P["External model provider"] <--> CTRL
-  U["Authorized remote inspection\nTailscale + individual accounts"] --> G
-  U --> W
+    CLI <-->|Inference requests| Provider[External model provider]
+
+    classDef client fill:#EDF3F2,stroke:#63817F,color:#24383D;
+    classDef service fill:#F7F9FA,stroke:#A1B1B4,color:#263A40;
+    classDef control fill:#344F54,stroke:#344F54,color:#FFFFFF;
+    classDef storage fill:#E3EBED,stroke:#778C93,color:#263A40;
+    class Discord,Console,Provider client;
+    class Gateway,Core,Controller,CLI service;
+    class Runner control;
+    class Postgres,Ledger,Workspace,Review,Evidence storage;
+    style AWS fill:#FAFBFC,stroke:#A1B1B4,color:#24383D;
+    style Docker fill:#EDF3F2,stroke:#63817F,color:#24383D;
