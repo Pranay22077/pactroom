@@ -80,6 +80,18 @@ The **team room** contains the three people, Facilitator and Runner. It holds di
 
 The five agent profiles use Codex in the demonstrated deployment. Runner is ordinary Python code, not another model. Role instructions are in [agent-instructions/](agent-instructions/).
 
+## Agents on the shared server
+
+[![Complete Switch ecosystem graph showing the shared server, agent-provider groups and Discord connection.](docs/assets/screenshots/switch-ecosystem-full.jpg)](docs/assets/screenshots/switch-ecosystem-page.jpg)
+
+*Actual ecosystem view captured on 8 November 2026: 16 agents, three types and one app. This is the broader shared server, including experimental profiles—not a claim that PactRoom uses 16 agents. Click to inspect the full-page capture. The graph is a static snapshot; the private dashboard remains interactive.*
+
+[![Switch Console agent directory showing Codex and OpenCode profiles on Relay AWS.](docs/assets/screenshots/switch-agent-directory.png)](docs/assets/screenshots/switch-agent-directory.png)
+
+*Actual user-provided Switch Console capture. The shared server also contains other experimental profiles; PactRoom uses its five named specialist and facilitator profiles, plus the non-model Runner. Status labels reflect the capture, not a live health check. Click the image to open it at full resolution.*
+
+[Explore the live Switch ecosystem](https://ip-172-31-18-2.tailc67e1d.ts.net/ecosystem) — restricted to authorized teammates with Tailscale access and a Switch account. The public diagrams in this README remain available without that access.
+
 ## Delivery evidence in Discord
 
 The team receives a short summary rather than raw agent output. This captured version-2 response reports 18 passing application tests, an approved independent review and acceptance of the candidate.
